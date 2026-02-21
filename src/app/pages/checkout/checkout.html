@@ -1,18 +1,141 @@
 <section class="checkout-page">
-  <h2>Checkout</h2>
+  <div class="checkout-shell">
+    <header class="checkout-header">
+      <p class="eyebrow">Create And Design</p>
+      <h2>Finalizar pedido</h2>
+      <p class="subtitle">Pedidos con minimo 3 dias de anticipacion para asegurar calidad y entrega.</p>
+    </header>
 
-  @if (items().length === 0 && !orderPlaced) {
-    <p>No hay productos en el carrito. <a routerLink="/products">Ir al catalogo</a></p>
-  }
+    @if (items().length === 0 && !orderPlaced) {
+      <div class="state-card">
+        <p>No hay productos en el carrito.</p>
+        <a class="btn btn-primary" routerLink="/products">Ir al catalogo</a>
+      </div>
+    }
 
-  @if (items().length > 0) {
-    <div>
-      <p>Total a pagar: ${{ totalPrice() }}</p>
-      <button (click)="placeOrder()">Confirmar pedido</button>
-    </div>
-  }
+    @if (items().length > 0 && !orderPlaced) {
+      <div class="checkout-grid">
+        <form class="checkout-form" (ngSubmit)="placeOrder()">
+          <h3>Datos de entrega</h3>
 
-  @if (orderPlaced) {
-    <p>Pedido confirmado. Gracias por tu compra.</p>
-  }
+          <label>
+            Nombre completo
+            <input type="text" name="customerName" [(ngModel)]="customerName" required />
+          </label>
+
+          <label>
+            Telefono
+            <input type="tel" name="phone" [(ngModel)]="phone" required />
+          </label>
+
+          <div class="row">
+            <label>
+              Fecha de entrega
+              <input
+                type="date"
+                name="deliveryDate"
+                [min]="minDeliveryDate"
+                [(ngModel)]="deliveryDate"
+                required
+              />
+            </label>
+
+            <label>
+              Hora de entrega
+              <input type="time" name="deliveryTime" [(ngModel)]="deliveryTime" required />
+            </label>
+          </div>
+
+          @if (deliveryDate && !isDateValid) {
+            <p class="input-error">La fecha debe ser minimo con 3 dias de anticipacion.</p>
+          }
+
+          <label>
+            Direccion de entrega
+            <textarea name="address" rows="3" [(ngModel)]="address" required></textarea>
+          </label>
+
+          <label>
+            Indicaciones adicionales (opcional)
+            <textarea name="notes" rows="3" [(ngModel)]="notes"></textarea>
+          </label>
+
+          <h3>Metodo de pago</h3>
+          <div class="payment-options">
+            <label class="pay-option">
+              <input type="radio" name="paymentMethod" value="efectivo" [(ngModel)]="paymentMethod" />
+              <span>Efectivo</span>
+            </label>
+            <label class="pay-option">
+              <input type="radio" name="paymentMethod" value="transferencia" [(ngModel)]="paymentMethod" />
+              <span>Transferencia</span>
+            </label>
+            <label class="pay-option">
+              <input type="radio" name="paymentMethod" value="tarjeta" [(ngModel)]="paymentMethod" />
+              <span>Tarjeta</span>
+            </label>
+          </div>
+
+          @if (paymentMethod === 'efectivo') {
+            <label>
+              Cambio para (opcional)
+              <input type="text" name="cashChangeFor" [(ngModel)]="cashChangeFor" placeholder="Ej: 1000" />
+            </label>
+          }
+
+          @if (paymentMethod === 'transferencia') {
+            <label>
+              Referencia de transferencia
+              <input type="text" name="transferReference" [(ngModel)]="transferReference" required />
+            </label>
+          }
+
+          @if (paymentMethod === 'tarjeta') {
+            <div class="row">
+              <label>
+                Nombre en la tarjeta
+                <input type="text" name="cardHolder" [(ngModel)]="cardHolder" required />
+              </label>
+              <label>
+                Ultimos 4 digitos
+                <input type="text" name="cardLast4" maxlength="4" [(ngModel)]="cardLast4" required />
+              </label>
+            </div>
+          }
+
+          @if (errorMessage) {
+            <p class="input-error">{{ errorMessage }}</p>
+          }
+
+          <button class="btn btn-primary" type="submit" [disabled]="!isFormValid">
+            Confirmar pedido
+          </button>
+        </form>
+
+        <aside class="summary-card">
+          <h3>Resumen</h3>
+          <div class="summary-items">
+            @for (item of items(); track item.product.id) {
+              <div class="summary-row">
+                <p>{{ item.product.name }} x{{ item.quantity }}</p>
+                <p>${{ item.product.price * item.quantity }}</p>
+              </div>
+            }
+          </div>
+          <div class="summary-total">
+            <p>Total</p>
+            <p>${{ totalPrice() }}</p>
+          </div>
+        </aside>
+      </div>
+    }
+
+    @if (orderPlaced) {
+      <div class="state-card success">
+        <h3>Pedido confirmado</h3>
+        <p>Gracias por tu compra. Preparamos tu arreglo floral con mucho cuidado.</p>
+        <a class="btn btn-primary" routerLink="/products">Seguir comprando</a>
+      </div>
+    }
+  </div>
 </section>

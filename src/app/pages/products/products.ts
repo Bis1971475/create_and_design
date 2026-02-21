@@ -1,16 +1,16 @@
-import { Component, OnInit, inject } from '@angular/core';
-import { ProductService } from '../../services/product';
-import { Product } from '../../models/product';
 import { CommonModule } from '@angular/common';
-import { CartService } from '../../services/cart';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { Product } from '../../models/product';
+import { CartService } from '../../services/cart';
+import { ProductService } from '../../services/product';
 
 @Component({
   selector: 'app-products',
   standalone: true,
   imports: [CommonModule, RouterLink],
-  styleUrls: ['./products.css'] ,
-  templateUrl: './products.html'
+  styleUrls: ['./products.css'],
+  templateUrl: './products.html',
 })
 export class ProductsComponent implements OnInit {
   lightboxVisible = false;
@@ -19,26 +19,37 @@ export class ProductsComponent implements OnInit {
 
   private readonly productService = inject(ProductService);
   private readonly cartService = inject(CartService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   ngOnInit(): void {
-    this.products = this.productService.getProducts();
-    this.products.forEach(p => (p.selectedImageIndex = 0));
-
+    void this.loadProducts();
   }
+
+  private async loadProducts(): Promise<void> {
+    this.products = await this.productService.getProducts();
+    this.products.forEach((p) => (p.selectedImageIndex = 0));
+    this.cdr.detectChanges();
+  }
+
   prevImage(product: Product): void {
-    if (!product.imageUrls) return;
+    if (!product.imageUrls) {
+      return;
+    }
+
     const currentIndex = product.selectedImageIndex ?? 0;
     product.selectedImageIndex =
-      (currentIndex - 1 + product.imageUrls.length) %
-      product.imageUrls.length;
+      (currentIndex - 1 + product.imageUrls.length) % product.imageUrls.length;
   }
 
   nextImage(product: Product): void {
-    if (!product.imageUrls) return;
+    if (!product.imageUrls) {
+      return;
+    }
+
     const currentIndex = product.selectedImageIndex ?? 0;
-    product.selectedImageIndex =
-      (currentIndex + 1) % product.imageUrls.length;
+    product.selectedImageIndex = (currentIndex + 1) % product.imageUrls.length;
   }
+
   openLightbox(imgUrl: string): void {
     this.lightboxImage = imgUrl;
     this.lightboxVisible = true;

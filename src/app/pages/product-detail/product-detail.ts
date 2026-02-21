@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Product } from '../../models/product';
 import { CartService } from '../../services/cart';
@@ -14,9 +14,11 @@ import { ProductService } from '../../services/product';
 })
 export class ProductDetailComponent implements OnInit {
   product?: Product;
+
   private readonly route = inject(ActivatedRoute);
   private readonly productService = inject(ProductService);
   private readonly cartService = inject(CartService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   ngOnInit(): void {
     const productId = this.route.snapshot.paramMap.get('id');
@@ -24,10 +26,17 @@ export class ProductDetailComponent implements OnInit {
       return;
     }
 
-    this.product = this.productService.getProductById(productId);
+    void this.loadProduct(productId);
+  }
+
+  private async loadProduct(productId: string): Promise<void> {
+    this.product = await this.productService.getProductById(productId);
+
     if (this.product && this.product.selectedImageIndex === undefined) {
       this.product.selectedImageIndex = 0;
     }
+
+    this.cdr.detectChanges();
   }
 
   prevImage(): void {

@@ -28,7 +28,7 @@
 
           <div class="cart-item-actions">
             <p>${{ item.product.price * item.quantity }}</p>
-            <button (click)="remove(item.product.id)">Eliminar</button>
+            <button class="btn btn-danger" (click)="remove(item.product.id)">Eliminar</button>
           </div>
         </article>
       }
@@ -36,8 +36,8 @@
       <div class="cart-summary">
         <p>Total productos: {{ totalItems() }}</p>
         <p>Total: ${{ totalPrice() }}</p>
-        <button (click)="clear()">Vaciar carrito</button>
-        <a class="checkout-link" routerLink="/checkout">Ir a checkout</a>
+        <button class="btn btn-ghost" (click)="clear()">Vaciar carrito</button>
+        <a class="checkout-link btn btn-primary" routerLink="/checkout">Ir a checkout</a>
       </div>
     </div>
   }
