@@ -1,0 +1,25 @@
+@if (product; as item) {
+  <section class="product-detail">
+    <a routerLink="/products">Volver al catalogo</a>
+
+    <h2>{{ item.name }}</h2>
+    <p>{{ item.description }}</p>
+
+    <img [src]="item.imageUrls[item.selectedImageIndex || 0]" alt="{{ item.name }}" />
+
+    @if (item.imageUrls.length > 1) {
+      <div class="actions">
+        <button (click)="prevImage()">&larr;</button>
+        <button (click)="nextImage()">&rarr;</button>
+      </div>
+    }
+
+    <p class="price">${{ item.price }}</p>
+    <button (click)="addToCart()">Agregar al carrito</button>
+  </section>
+} @else {
+  <section class="product-detail">
+    <p>Producto no encontrado.</p>
+    <a routerLink="/products">Volver al catalogo</a>
+  </section>
+}

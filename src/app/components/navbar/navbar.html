@@ -1,0 +1,11 @@
+<nav class="navbar">
+  <a class="logo" routerLink="/">Create And Design</a>
+
+  <div class="menu">
+    <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Inicio</a>
+    <a routerLink="/products" routerLinkActive="active">Catalogo</a>
+    <a routerLink="/cart" routerLinkActive="active">Carrito</a>
+  </div>
+
+  <a class="cart" routerLink="/cart">Carrito ({{ totalItems() }})</a>
+</nav>

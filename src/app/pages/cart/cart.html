@@ -1,0 +1,44 @@
+<section class="cart-page">
+  <h2>Carrito</h2>
+
+  @if (totalItems() === 0) {
+    <p>Tu carrito esta vacio.</p>
+  }
+
+  @if (totalItems() > 0) {
+    <div>
+      @for (item of items(); track item.product.id) {
+        <article class="cart-item">
+          <img [src]="item.product.imageUrls[0]" alt="{{ item.product.name }}" loading="lazy" />
+
+          <div class="cart-item-content">
+            <h3>{{ item.product.name }}</h3>
+            <p>${{ item.product.price }} c/u</p>
+            <label>
+              Cantidad
+              <input
+                type="number"
+                min="1"
+                [max]="item.product.stock"
+                [value]="item.quantity"
+                (change)="updateQuantity(item, $event)"
+              />
+            </label>
+          </div>
+
+          <div class="cart-item-actions">
+            <p>${{ item.product.price * item.quantity }}</p>
+            <button (click)="remove(item.product.id)">Eliminar</button>
+          </div>
+        </article>
+      }
+
+      <div class="cart-summary">
+        <p>Total productos: {{ totalItems() }}</p>
+        <p>Total: ${{ totalPrice() }}</p>
+        <button (click)="clear()">Vaciar carrito</button>
+        <a class="checkout-link" routerLink="/checkout">Ir a checkout</a>
+      </div>
+    </div>
+  }
+</section>

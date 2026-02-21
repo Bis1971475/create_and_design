@@ -1,0 +1,18 @@
+<section class="checkout-page">
+  <h2>Checkout</h2>
+
+  @if (items().length === 0 && !orderPlaced) {
+    <p>No hay productos en el carrito. <a routerLink="/products">Ir al catalogo</a></p>
+  }
+
+  @if (items().length > 0) {
+    <div>
+      <p>Total a pagar: ${{ totalPrice() }}</p>
+      <button (click)="placeOrder()">Confirmar pedido</button>
+    </div>
+  }
+
+  @if (orderPlaced) {
+    <p>Pedido confirmado. Gracias por tu compra.</p>
+  }
+</section>
