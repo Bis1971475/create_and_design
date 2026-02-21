@@ -2,6 +2,7 @@ import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { NavbarComponent } from './components/navbar/navbar';
 import { Footer } from './components/footer/footer';
+import { NotificationService } from './services/notification';
 
 
 @Component({
@@ -13,4 +14,9 @@ import { Footer } from './components/footer/footer';
 })
 export class App {
   protected readonly title = signal('create-and-design');
+  protected readonly toastMessage;
+
+  constructor(notificationService: NotificationService) {
+    this.toastMessage = notificationService.message;
+  }
 }

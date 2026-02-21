@@ -3,6 +3,7 @@ import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Product } from '../../models/product';
 import { CartService } from '../../services/cart';
+import { NotificationService } from '../../services/notification';
 import { ProductService } from '../../services/product';
 
 @Component({
@@ -18,6 +19,7 @@ export class ProductDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly productService = inject(ProductService);
   private readonly cartService = inject(CartService);
+  private readonly notificationService = inject(NotificationService);
   private readonly cdr = inject(ChangeDetectorRef);
 
   ngOnInit(): void {
@@ -64,5 +66,6 @@ export class ProductDetailComponent implements OnInit {
     }
 
     this.cartService.add(this.product);
+    this.notificationService.success(`${this.product.name} agregado al carrito`);
   }
 }

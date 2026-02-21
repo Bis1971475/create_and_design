@@ -2,3 +2,9 @@
 
 <router-outlet></router-outlet>
 <app-footer></app-footer>
+
+@if (toastMessage(); as toast) {
+  <div class="global-toast" role="status" aria-live="polite">
+    {{ toast }}
+  </div>
+}

@@ -1,0 +1,25 @@
+.global-toast {
+  position: fixed;
+  right: 16px;
+  bottom: 18px;
+  z-index: 12000;
+  background: #14532d;
+  color: #fff;
+  border-radius: 12px;
+  padding: 11px 14px;
+  font-weight: 600;
+  box-shadow: 0 14px 30px rgba(20, 83, 45, 0.3);
+  animation: toast-in 0.2s ease-out;
+}
+
+@keyframes toast-in {
+  from {
+    transform: translateY(8px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
