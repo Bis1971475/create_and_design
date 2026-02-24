@@ -70,10 +70,6 @@
               <input type="radio" name="paymentMethod" value="transferencia" [(ngModel)]="paymentMethod" />
               <span>Transferencia</span>
             </label>
-            <label class="pay-option">
-              <input type="radio" name="paymentMethod" value="tarjeta" [(ngModel)]="paymentMethod" />
-              <span>Tarjeta</span>
-            </label>
           </div>
 
           @if (paymentMethod === 'efectivo') {
@@ -90,25 +86,12 @@
             </label>
           }
 
-          @if (paymentMethod === 'tarjeta') {
-            <div class="row">
-              <label>
-                Nombre en la tarjeta
-                <input type="text" name="cardHolder" [(ngModel)]="cardHolder" required />
-              </label>
-              <label>
-                Ultimos 4 digitos
-                <input type="text" name="cardLast4" maxlength="4" [(ngModel)]="cardLast4" required />
-              </label>
-            </div>
-          }
-
           @if (errorMessage) {
             <p class="input-error">{{ errorMessage }}</p>
           }
 
-          <button class="btn btn-primary" type="submit" [disabled]="!isFormValid">
-            Confirmar pedido
+          <button class="btn btn-primary" type="submit" [disabled]="!isFormValid || isSubmitting">
+            {{ isSubmitting ? 'Registrando pedido...' : 'Confirmar pedido' }}
           </button>
         </form>
 
@@ -134,6 +117,9 @@
       <div class="state-card success">
         <h3>Pedido confirmado</h3>
         <p>Gracias por tu compra. Preparamos tu arreglo floral con mucho cuidado.</p>
+        @if (createdOrderId) {
+          <p><strong>Folio:</strong> {{ createdOrderId }}</p>
+        }
         <a class="btn btn-primary" routerLink="/products">Seguir comprando</a>
       </div>
     }

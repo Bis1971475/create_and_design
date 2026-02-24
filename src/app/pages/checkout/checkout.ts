@@ -3,8 +3,7 @@ import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { CartService } from '../../services/cart';
-
-type PaymentMethod = 'efectivo' | 'transferencia' | 'tarjeta';
+import { OrderService, PaymentMethod } from '../../services/order';
 
 @Component({
   selector: 'app-checkout',
@@ -16,6 +15,8 @@ type PaymentMethod = 'efectivo' | 'transferencia' | 'tarjeta';
 export class CheckoutComponent {
   orderPlaced = false;
   errorMessage = '';
+  isSubmitting = false;
+  createdOrderId = '';
 
   customerName = '';
   phone = '';
@@ -27,10 +28,9 @@ export class CheckoutComponent {
   paymentMethod: PaymentMethod = 'efectivo';
   cashChangeFor = '';
   transferReference = '';
-  cardHolder = '';
-  cardLast4 = '';
 
   private readonly cartService = inject(CartService);
+  private readonly orderService = inject(OrderService);
 
   readonly items = this.cartService.items;
   readonly totalPrice = this.cartService.totalPrice;
@@ -61,15 +61,10 @@ export class CheckoutComponent {
       return this.transferReference.trim().length > 3;
     }
 
-    if (this.paymentMethod === 'tarjeta') {
-      const last4Valid = /^\d{4}$/.test(this.cardLast4.trim());
-      return this.cardHolder.trim().length > 2 && last4Valid;
-    }
-
     return true;
   }
 
-  placeOrder(): void {
+  async placeOrder(): Promise<void> {
     this.errorMessage = '';
 
     if (this.items().length === 0) {
@@ -82,8 +77,55 @@ export class CheckoutComponent {
       return;
     }
 
-    this.cartService.clear();
-    this.orderPlaced = true;
+    this.isSubmitting = true;
+
+    try {
+      const response = await this.orderService.createOrder({
+        customer: {
+          name: this.customerName.trim(),
+          phone: this.phone.trim(),
+        },
+        delivery: {
+          date: this.deliveryDate,
+          time: this.deliveryTime,
+          address: this.address.trim(),
+          notes: this.notes.trim(),
+        },
+        payment: {
+          method: this.paymentMethod,
+          details: this.getPaymentDetails(),
+        },
+        total: this.totalPrice(),
+        items: this.orderService.buildItemsFromCart(this.items()),
+      });
+
+      this.createdOrderId = response.orderId;
+      this.cartService.clear();
+      this.orderPlaced = true;
+    } catch (error: unknown) {
+      if (error instanceof Error && error.message === 'API_BASE_URL_NOT_CONFIGURED') {
+        this.errorMessage = 'Falta configurar la URL del API de pedidos.';
+      } else {
+        this.errorMessage = 'No se pudo registrar el pedido. Intentalo de nuevo en un momento.';
+      }
+    } finally {
+      this.isSubmitting = false;
+    }
+  }
+
+  private getPaymentDetails(): {
+    cashChangeFor?: string;
+    transferReference?: string;
+  } {
+    if (this.paymentMethod === 'efectivo') {
+      return this.cashChangeFor.trim() ? { cashChangeFor: this.cashChangeFor.trim() } : {};
+    }
+
+    if (this.paymentMethod === 'transferencia') {
+      return { transferReference: this.transferReference.trim() };
+    }
+
+    return {};
   }
 
   private getMinDeliveryDate(): string {
