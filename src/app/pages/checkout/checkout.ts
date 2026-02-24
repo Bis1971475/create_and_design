@@ -6,6 +6,8 @@ import { CartService } from '../../services/cart';
 import { OrderService, PaymentMethod } from '../../services/order';
 import { environment } from '../../../environments/environment';
 
+type DeliveryMode = 'domicilio' | 'sucursal';
+
 @Component({
   selector: 'app-checkout',
   standalone: true,
@@ -24,11 +26,13 @@ export class CheckoutComponent {
   deliveryDate = '';
   address = '';
   notes = '';
+  deliveryMode: DeliveryMode = 'domicilio';
 
   paymentMethod: PaymentMethod = 'efectivo';
   cashChangeFor = '';
   transferReference = '';
   readonly transferClabe = environment.transferClabe.trim();
+  readonly deliveryFeeForHome = 50;
 
   private readonly cartService = inject(CartService);
   private readonly orderService = inject(OrderService);
@@ -37,6 +41,33 @@ export class CheckoutComponent {
   readonly totalPrice = this.cartService.totalPrice;
 
   readonly minDeliveryDate = this.getMinDeliveryDate();
+
+  get normalizedPhone(): string {
+    return this.phone.replace(/[^\d+]/g, '').trim();
+  }
+
+  get isPhoneValid(): boolean {
+    const phoneDigitsOnly = this.phone.replace(/\D/g, '');
+    return phoneDigitsOnly.length >= 10 && phoneDigitsOnly.length <= 15;
+  }
+
+  get isAddressDetailed(): boolean {
+    const trimmedAddress = this.address.trim();
+    if (!trimmedAddress) {
+      return false;
+    }
+
+    const hasStreetNumber = /\d/.test(trimmedAddress);
+    return trimmedAddress.length >= 12 && hasStreetNumber;
+  }
+
+  get deliveryFee(): number {
+    return this.deliveryMode === 'domicilio' ? this.deliveryFeeForHome : 0;
+  }
+
+  get totalWithDelivery(): number {
+    return this.totalPrice() + this.deliveryFee;
+  }
 
   get isDateValid(): boolean {
     if (!this.deliveryDate) {
@@ -50,10 +81,14 @@ export class CheckoutComponent {
     if (
       !this.customerName.trim() ||
       !this.phone.trim() ||
+      !this.isPhoneValid ||
       !this.deliveryDate ||
-      !this.address.trim() ||
       !this.isDateValid
     ) {
+      return false;
+    }
+
+    if (this.deliveryMode === 'domicilio' && !this.isAddressDetailed) {
       return false;
     }
 
@@ -83,18 +118,18 @@ export class CheckoutComponent {
       const response = await this.orderService.createOrder({
         customer: {
           name: this.customerName.trim(),
-          phone: this.phone.trim(),
+          phone: this.normalizedPhone,
         },
         delivery: {
           date: this.deliveryDate,
-          address: this.address.trim(),
+          address: this.deliveryMode === 'domicilio' ? this.address.trim() : 'Recoger en sucursal',
           notes: this.notes.trim(),
         },
         payment: {
           method: this.paymentMethod,
           details: this.getPaymentDetails(),
         },
-        total: this.totalPrice(),
+        total: this.totalWithDelivery,
         items: this.orderService.buildItemsFromCart(this.items()),
       });
 

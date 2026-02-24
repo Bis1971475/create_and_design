@@ -25,8 +25,18 @@
 
           <label>
             Telefono
-            <input type="tel" name="phone" [(ngModel)]="phone" required />
+            <input
+              type="tel"
+              name="phone"
+              [(ngModel)]="phone"
+              placeholder="Ej: 55 1234 5678"
+              required
+              pattern="^[0-9+\\s-]{10,20}$"
+            />
           </label>
+          @if (phone && !isPhoneValid) {
+            <p class="input-error">Ingresa un telefono valido (10 a 15 digitos).</p>
+          }
 
           <div class="row">
             <label>
@@ -41,14 +51,41 @@
             </label>
           </div>
 
+          <h3>Tipo de entrega</h3>
+          <div class="payment-options">
+            <label class="pay-option">
+              <input type="radio" name="deliveryMode" value="domicilio" [(ngModel)]="deliveryMode" />
+              <span>A domicilio (+$50)</span>
+            </label>
+            <label class="pay-option">
+              <input type="radio" name="deliveryMode" value="sucursal" [(ngModel)]="deliveryMode" />
+              <span>Recoger en sucursal ($0)</span>
+            </label>
+          </div>
+
           @if (deliveryDate && !isDateValid) {
             <p class="input-error">La fecha debe ser minimo con 3 dias de anticipacion.</p>
           }
 
-          <label>
-            Direccion de entrega
-            <textarea name="address" rows="3" [(ngModel)]="address" required></textarea>
-          </label>
+          @if (deliveryMode === 'domicilio') {
+            <label>
+              Direccion de entrega
+              <textarea
+                name="address"
+                rows="3"
+                [(ngModel)]="address"
+                placeholder="Calle y numero, colonia, municipio y referencias"
+                required
+              ></textarea>
+            </label>
+            @if (address && !isAddressDetailed) {
+              <p class="input-error">Escribe una direccion completa con calle, numero y referencia.</p>
+            }
+          }
+
+          @if (deliveryMode === 'sucursal') {
+            <p class="transfer-info">Seleccionaste recoger en sucursal. No se agrega costo de envio.</p>
+          }
 
           <label>
             Indicaciones adicionales (opcional)
@@ -106,9 +143,17 @@
               </div>
             }
           </div>
+          <div class="summary-row">
+            <p>Subtotal</p>
+            <p>${{ totalPrice() }}</p>
+          </div>
+          <div class="summary-row">
+            <p>Entrega</p>
+            <p>${{ deliveryFee }}</p>
+          </div>
           <div class="summary-total">
             <p>Total</p>
-            <p>${{ totalPrice() }}</p>
+            <p>${{ totalWithDelivery }}</p>
           </div>
         </aside>
       </div>
