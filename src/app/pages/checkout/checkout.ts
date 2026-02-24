@@ -24,7 +24,11 @@ export class CheckoutComponent {
   customerName = '';
   phone = '';
   deliveryDate = '';
-  address = '';
+  street = '';
+  exteriorNumber = '';
+  neighborhood = '';
+  city = '';
+  addressReference = '';
   notes = '';
   deliveryMode: DeliveryMode = 'domicilio';
 
@@ -52,13 +56,12 @@ export class CheckoutComponent {
   }
 
   get isAddressDetailed(): boolean {
-    const trimmedAddress = this.address.trim();
-    if (!trimmedAddress) {
-      return false;
-    }
-
-    const hasStreetNumber = /\d/.test(trimmedAddress);
-    return trimmedAddress.length >= 12 && hasStreetNumber;
+    return (
+      this.street.trim().length >= 3 &&
+      this.exteriorNumber.trim().length >= 1 &&
+      this.neighborhood.trim().length >= 3 &&
+      this.city.trim().length >= 3
+    );
   }
 
   get deliveryFee(): number {
@@ -73,8 +76,9 @@ export class CheckoutComponent {
     if (!this.deliveryDate) {
       return false;
     }
-
-    return this.deliveryDate >= this.minDeliveryDate;
+    const selectedDate = new Date(`${this.deliveryDate}T00:00:00`);
+    const minDate = new Date(`${this.minDeliveryDate}T00:00:00`);
+    return selectedDate.getTime() >= minDate.getTime();
   }
 
   get isFormValid(): boolean {
@@ -122,7 +126,7 @@ export class CheckoutComponent {
         },
         delivery: {
           date: this.deliveryDate,
-          address: this.deliveryMode === 'domicilio' ? this.address.trim() : 'Recoger en sucursal',
+          address: this.deliveryMode === 'domicilio' ? this.buildDeliveryAddress() : 'Recoger en sucursal',
           notes: this.notes.trim(),
         },
         payment: {
@@ -179,5 +183,11 @@ export class CheckoutComponent {
     const day = String(minDate.getDate()).padStart(2, '0');
 
     return `${year}-${month}-${day}`;
+  }
+
+  private buildDeliveryAddress(): string {
+    const baseAddress = `${this.street.trim()} ${this.exteriorNumber.trim()}, ${this.neighborhood.trim()}, ${this.city.trim()}`;
+    const reference = this.addressReference.trim();
+    return reference ? `${baseAddress}. Referencia: ${reference}` : baseAddress;
   }
 }

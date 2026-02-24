@@ -28,6 +28,16 @@ export class ProductDetailComponent implements OnInit {
       return;
     }
 
+    const stateProduct = history.state?.['product'] as Product | undefined;
+    if (stateProduct && stateProduct.id === productId) {
+      this.product = stateProduct;
+      if (this.product.selectedImageIndex === undefined) {
+        this.product.selectedImageIndex = 0;
+      }
+      this.cdr.detectChanges();
+      return;
+    }
+
     void this.loadProduct(productId);
   }
 

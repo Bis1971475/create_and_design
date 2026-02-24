@@ -14,9 +14,12 @@ import { ProductService } from '../../services/product';
   templateUrl: './products.html',
 })
 export class ProductsComponent implements OnInit {
+  private readonly firstLoadSessionKey = 'catalog_loaded_once';
+
   lightboxVisible = false;
   lightboxImage = '';
   products: Product[] = [];
+  isInitialLoading = false;
 
   private readonly productService = inject(ProductService);
   private readonly cartService = inject(CartService);
@@ -24,13 +27,19 @@ export class ProductsComponent implements OnInit {
   private readonly cdr = inject(ChangeDetectorRef);
 
   ngOnInit(): void {
+    this.isInitialLoading = !sessionStorage.getItem(this.firstLoadSessionKey);
     void this.loadProducts();
   }
 
   private async loadProducts(): Promise<void> {
-    this.products = await this.productService.getProducts();
-    this.products.forEach((p) => (p.selectedImageIndex = 0));
-    this.cdr.detectChanges();
+    try {
+      this.products = await this.productService.getProducts();
+      this.products.forEach((p) => (p.selectedImageIndex = 0));
+      sessionStorage.setItem(this.firstLoadSessionKey, '1');
+    } finally {
+      this.isInitialLoading = false;
+      this.cdr.detectChanges();
+    }
   }
 
   prevImage(product: Product): void {

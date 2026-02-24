@@ -1,34 +1,41 @@
 <h2 class="title">Create and Design</h2>
 
-<div class="products-grid">
-  @for (product of products; track trackByProductId($index, product)) {
-    <div class="product-card">
-      <img
-        [src]="product.imageUrls[product.selectedImageIndex || 0]"
-        alt="{{ product.name }}"
-        (click)="openLightbox(product.imageUrls[product.selectedImageIndex || 0])"
-        (keyup.enter)="openLightbox(product.imageUrls[product.selectedImageIndex || 0])"
-        loading="lazy"
-        tabindex="0"
-        role="button"
-      />
+@if (isInitialLoading) {
+  <div class="catalog-loader" aria-live="polite" aria-busy="true">
+    <div class="spinner" aria-hidden="true"></div>
+    <p>Cargando catalogo...</p>
+  </div>
+} @else {
+  <div class="products-grid">
+    @for (product of products; track trackByProductId($index, product)) {
+      <div class="product-card">
+        <img
+          [src]="product.imageUrls[product.selectedImageIndex || 0]"
+          alt="{{ product.name }}"
+          (click)="openLightbox(product.imageUrls[product.selectedImageIndex || 0])"
+          (keyup.enter)="openLightbox(product.imageUrls[product.selectedImageIndex || 0])"
+          loading="lazy"
+          tabindex="0"
+          role="button"
+        />
 
-      @if (product.imageUrls.length > 1) {
-        <div class="image-buttons">
-          <button (click)="prevImage(product)">&larr;</button>
-          <button (click)="nextImage(product)">&rarr;</button>
-        </div>
-      }
+        @if (product.imageUrls.length > 1) {
+          <div class="image-buttons">
+            <button (click)="prevImage(product)">&larr;</button>
+            <button (click)="nextImage(product)">&rarr;</button>
+          </div>
+        }
 
-      <h3>{{ product.name }}</h3>
-      <p>{{ product.description }}</p>
-      <div class="price">${{ product.price }}</div>
+        <h3>{{ product.name }}</h3>
+        <p>{{ product.description }}</p>
+        <div class="price">${{ product.price }}</div>
 
-      <button (click)="addToCart(product)">Agregar al carrito</button>
-      <a class="detail-link" [routerLink]="['/product', product.id]">Ver detalle</a>
-    </div>
-  }
-</div>
+        <button (click)="addToCart(product)">Agregar al carrito</button>
+        <a class="detail-link" [routerLink]="['/product', product.id]" [state]="{ product: product }">Ver detalle</a>
+      </div>
+    }
+  </div>
+}
 
 @if (lightboxVisible) {
   <div

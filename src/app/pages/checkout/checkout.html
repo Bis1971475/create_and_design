@@ -68,18 +68,40 @@
           }
 
           @if (deliveryMode === 'domicilio') {
+            <div class="address-grid">
+              <label>
+                Calle
+                <input type="text" name="street" [(ngModel)]="street" placeholder="Ej: Av. Juarez" required />
+              </label>
+
+              <label>
+                Numero exterior
+                <input type="text" name="exteriorNumber" [(ngModel)]="exteriorNumber" placeholder="Ej: 120" required />
+              </label>
+
+              <label>
+                Colonia
+                <input type="text" name="neighborhood" [(ngModel)]="neighborhood" placeholder="Ej: Centro" required />
+              </label>
+
+              <label>
+                Municipio / Ciudad
+                <input type="text" name="city" [(ngModel)]="city" placeholder="Ej: Guadalajara" required />
+              </label>
+            </div>
+
             <label>
-              Direccion de entrega
-              <textarea
-                name="address"
-                rows="3"
-                [(ngModel)]="address"
-                placeholder="Calle y numero, colonia, municipio y referencias"
-                required
-              ></textarea>
+              Referencia (opcional)
+              <input
+                type="text"
+                name="addressReference"
+                [(ngModel)]="addressReference"
+                placeholder="Ej: Porton negro frente al parque"
+              />
             </label>
-            @if (address && !isAddressDetailed) {
-              <p class="input-error">Escribe una direccion completa con calle, numero y referencia.</p>
+
+            @if ((street || exteriorNumber || neighborhood || city) && !isAddressDetailed) {
+              <p class="input-error">Completa calle, numero exterior, colonia y municipio/ciudad.</p>
             }
           }
 

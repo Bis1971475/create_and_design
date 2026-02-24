@@ -48,7 +48,11 @@ public class Function
         return new APIGatewayProxyResponse
         {
             StatusCode = statusCode,
-            Headers = new Dictionary<string, string> { { "content-type", "application/json" } },
+            Headers = new Dictionary<string, string>
+            {
+                { "content-type", "application/json" },
+                { "cache-control", "public, max-age=60, stale-while-revalidate=300" },
+            },
             Body = JsonSerializer.Serialize(body),
         };
     }
