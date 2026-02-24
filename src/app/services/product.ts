@@ -1,112 +1,29 @@
-import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Injectable, inject } from '@angular/core';
 import { Product } from '../models/product';
-import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { firstValueFrom, timeout } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProductService {
-    // Configurar cliente S3
-  private  s3Client = new S3Client({
-    region: 'us-east-1', // Tu región
-    credentials: {
-      accessKeyId: 'TU_ACCESS_KEY',
-      secretAccessKey: 'TU_SECRET_KEY'
+  private readonly http = inject(HttpClient);
+  private readonly apiBaseUrl = environment.apiBaseUrl.replace(/\/$/, '');
+
+  async getProducts(): Promise<Product[]> {
+    if (!this.apiBaseUrl) {
+      throw new Error('API_BASE_URL_NOT_CONFIGURED');
     }
-  });
 
-  private products: Product[] = [
-    {
-      id: '1',
-      name: 'Ramo de Rosas con Fresas',
-      description: 'Ramo de 24 rosas con 6 fresas decoradas',
-      price: 650,
-      imageUrls: [
-        '/flowers/strawberrysFlowers.jpeg',
-        '/flowers/strawberrysFlowers2.jpeg',
-        '/flowers/strawberrysFlowers3.jpeg'
-      ],
-      category: 'Rosas',
-      stock: 10
-    },
-    {
-      id: '2',
-      name: 'Caja de Rosas',
-      description: 'Caja de 48 rosas en forma de corazon con fresas decoradas, con foto',
-      price: 900,
-      imageUrls: [
-        '/flowers/cajaFlor.jpg',
-        '/flowers/cajaFlor2.jpg',
-        '/flowers/cajaFlor3.jpg'
-      ],
-      category: 'Rosas',
-      stock: 5
-    },
-    {
-      id: '3',
-      name: 'Globo Burbuja',
-      description: 'Globo personalizad de 2 colores y texto a eleccion',
-      price: 550,
-      imageUrls: [
-        '/flowers/globoBurbuja.jpg',
-        '/flowers/globoBurbuja2.jpg',
-        '/flowers/globoBurbuja3.jpg'
-      ],
-      category: 'Globo',
-      stock: 7
-    },
-    {
-      id: '4',
-      name: 'Ramo de 48 rosas',
-      description: 'ramo de 48 rosas de 2 colores a eleccion',
-      price: 550,
-      imageUrls: [
-        '/flowers/ramo48rosas.jpg'
-      ],
-      category: 'Rosas',
-      stock: 7
-    }
-    ,
-    {
-      id: '5',
-      name: 'Ramo de 24 rosas',
-      description: 'ramo de 24 rosas',
-      price: 450,
-      imageUrls: [
-        '/flowers/ramo.jpg'
-      ],
-      category: 'Rosas',
-      stock: 7
-    }
-  ];
+    const endpoint = `${this.apiBaseUrl}/products`;
+    const products = await firstValueFrom(this.http.get<Product[]>(endpoint).pipe(timeout(15000)));
 
-  getProducts(): Product[] {
-    return this.products;
-  }
-  getProductById(productId: string): Product | undefined {
-    return this.products.find((p) => p.id === productId);
-  }
-  // Subir archivo
-  async  uploadFile(file: File, bucketName: string, key: string) {
-    const command = new PutObjectCommand({
-      Bucket: bucketName,
-      Key: key,
-      Body: file,
-      ContentType: file.type
-    });
-    
-    return await this.s3Client.send(command);
+    return products ?? [];
   }
 
-  // Obtener URL firmada para descarga
-  async  getDownloadUrl(bucketName: string, key: string) {
-    const command = new GetObjectCommand({
-      Bucket: bucketName,
-      Key: key
-    });
-    
-    return await getSignedUrl(this.s3Client, command, { expiresIn: 3600 });
+  async getProductById(productId: string): Promise<Product | undefined> {
+    const products = await this.getProducts();
+    return products.find((p) => p.id === productId);
   }
-
 }

@@ -20,7 +20,7 @@ export interface CreateOrderRequest {
   };
   delivery: {
     date: string;
-    time: string;
+    time?: string;
     address: string;
     notes: string;
   };
@@ -29,6 +29,7 @@ export interface CreateOrderRequest {
     details: {
       cashChangeFor?: string;
       transferReference?: string;
+      transferClabe?: string;
     };
   };
   total: number;

@@ -39,11 +39,6 @@
                 required
               />
             </label>
-
-            <label>
-              Hora de entrega
-              <input type="time" name="deliveryTime" [(ngModel)]="deliveryTime" required />
-            </label>
           </div>
 
           @if (deliveryDate && !isDateValid) {
@@ -80,6 +75,12 @@
           }
 
           @if (paymentMethod === 'transferencia') {
+            @if (transferClabe) {
+              <div class="transfer-info">
+                <p>CLABE para transferencia:</p>
+                <strong>{{ transferClabe }}</strong>
+              </div>
+            }
             <label>
               Referencia de transferencia
               <input type="text" name="transferReference" [(ngModel)]="transferReference" required />

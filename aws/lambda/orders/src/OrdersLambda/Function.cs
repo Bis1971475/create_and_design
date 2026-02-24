@@ -26,7 +26,13 @@ public class Function
             return BuildResponse(400, new { message = "Request body is required" });
         }
 
-        var payload = JsonSerializer.Deserialize<CreateOrderRequest>(request.Body);
+        var payload = JsonSerializer.Deserialize<CreateOrderRequest>(
+            request.Body,
+            new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+            }
+        );
         if (payload is null)
         {
             return BuildResponse(400, new { message = "Invalid JSON body" });
@@ -82,6 +88,7 @@ public class Function
                         {
                             ["cashChangeFor"] = new AttributeValue { S = payload.Payment.Details?.CashChangeFor ?? string.Empty },
                             ["transferReference"] = new AttributeValue { S = payload.Payment.Details?.TransferReference ?? string.Empty },
+                            ["transferClabe"] = new AttributeValue { S = payload.Payment.Details?.TransferClabe ?? string.Empty },
                             ["cardHolder"] = new AttributeValue { S = payload.Payment.Details?.CardHolder ?? string.Empty },
                             ["cardLast4"] = new AttributeValue { S = payload.Payment.Details?.CardLast4 ?? string.Empty },
                         },
@@ -171,6 +178,7 @@ public class PaymentDetails
 {
     public string? CashChangeFor { get; set; }
     public string? TransferReference { get; set; }
+    public string? TransferClabe { get; set; }
     public string? CardHolder { get; set; }
     public string? CardLast4 { get; set; }
 }

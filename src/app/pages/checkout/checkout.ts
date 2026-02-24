@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { CartService } from '../../services/cart';
 import { OrderService, PaymentMethod } from '../../services/order';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-checkout',
@@ -21,13 +22,13 @@ export class CheckoutComponent {
   customerName = '';
   phone = '';
   deliveryDate = '';
-  deliveryTime = '';
   address = '';
   notes = '';
 
   paymentMethod: PaymentMethod = 'efectivo';
   cashChangeFor = '';
   transferReference = '';
+  readonly transferClabe = environment.transferClabe.trim();
 
   private readonly cartService = inject(CartService);
   private readonly orderService = inject(OrderService);
@@ -50,7 +51,6 @@ export class CheckoutComponent {
       !this.customerName.trim() ||
       !this.phone.trim() ||
       !this.deliveryDate ||
-      !this.deliveryTime ||
       !this.address.trim() ||
       !this.isDateValid
     ) {
@@ -87,7 +87,6 @@ export class CheckoutComponent {
         },
         delivery: {
           date: this.deliveryDate,
-          time: this.deliveryTime,
           address: this.address.trim(),
           notes: this.notes.trim(),
         },
@@ -116,13 +115,20 @@ export class CheckoutComponent {
   private getPaymentDetails(): {
     cashChangeFor?: string;
     transferReference?: string;
+    transferClabe?: string;
   } {
     if (this.paymentMethod === 'efectivo') {
       return this.cashChangeFor.trim() ? { cashChangeFor: this.cashChangeFor.trim() } : {};
     }
 
     if (this.paymentMethod === 'transferencia') {
-      return { transferReference: this.transferReference.trim() };
+      const transferDetails: { transferReference: string; transferClabe?: string } = {
+        transferReference: this.transferReference.trim(),
+      };
+      if (this.transferClabe) {
+        transferDetails.transferClabe = this.transferClabe;
+      }
+      return transferDetails;
     }
 
     return {};
